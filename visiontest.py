@@ -29,19 +29,19 @@ else:
 # Camera with Exposure in Night mode
 #LOWER_HSV = numpy.array([45,162,130]) 
 #UPPER_HSV = numpy.array([78,255,255])
-LOWER_HSV = numpy.array([43,113,130])
+LOWER_HSV = numpy.array([43,100,110])
 UPPER_HSV = numpy.array([99,255,255])
 
 #These constants control goal detection values
 GOAL_RATIO = 25.0 / 55.0    #Retroreflective tape Height/Width (pixel counted from camera view)
-GOAL_MINIMUM_AREA = 200#280   #The smallest number of pixel area that a goal should be
+GOAL_MINIMUM_AREA = 50   #The smallest number of pixel area that a goal should be
 GOAL_MAXIMUM_AREA = 550
-GOAL_RATIO_ERROR = 0.35     #Allowable error from ratio
-GOAL_CENTER = 136           #129 X position within camera frame where we need to center goal
+GOAL_RATIO_ERROR = 0.20     #Allowable error from ratio
+GOAL_CENTER = 129           #X position within camera frame where we need to center goal
 GOAL_CENTER_ERROR = 4       #Allowable error from center, in pixels.
 
 #Parameters for robot turning speed
-TURN_SCALE = 0.011           #Multiplier to determine turn rate, given error from center in pixels that will determine the robot turn rate
+TURN_SCALE = 0.01           #Multiplier to determine turn rate, given error from center in pixels that will determine the robot turn rate
 TURN_MAX_RATE = 0.9        #Fastest turn rate allowed
 TURN_MIN_RATE = 0.55      #was .7 Slowest turn rate allowed
 
@@ -136,6 +136,10 @@ def process():
                 if area > GOAL_MINIMUM_AREA:
                     # Is 5the h/w ratio close to that of the goal ratio?
                     x,y,w,h = cv2.boundingRect(c)
+                    r = cv2.minAreaRect(c)
+                    print format_number(r[0][0]), format_number(r[0][1]), format_number(r[1][0]), format_number(r[1][1]), format_number(r[2])  
+                    
+
                     #print w,h,w/h
                     #print w, h, (x+w/2)
                     ratio = float(h) / float(w)
@@ -151,7 +155,7 @@ def process():
                         else:
                             #No, need to issue a turn command
                             turn = calcTurnRate(centerError)
-                        print h,w,area,center,turn
+                       #print h,w,area,center,turn
                         #print "w",w,"h",h,"c",center,"t",turn
                         break
         else:
@@ -185,7 +189,12 @@ def process():
         # Wait 1ms for keypress. q to quit.
         if cv2.waitKey(1) &0xFF == ord('q'):
             break
+        
+def format_number(x):
+    return '{:6.2f}'.format(float(x))
 
+ 
+    
 # Process until user exit (q or ctrl-c)
 try:
     process()
@@ -193,4 +202,6 @@ try:
 finally:
     video.stop()
     cv2.destroyAllWindows()
+
+     
 
